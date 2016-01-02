@@ -1,0 +1,22 @@
+body {
+	background-color: tan;
+}
+#chart {
+	/* border: 1px solid black; 
+	background-color: tan; */
+	padding: 1em;
+	display: inline-block;
+}
+#chart > svg {
+	border: 1px solid black;
+	background-color: white;
+}
+
+rect {
+	fill: white;
+	stroke: #000;
+}
+
+.selected {
+	fill: darkgreen;
+}
