@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="description" content="simotrone website" />
+    <meta name="identifier" content="http://www.simotrone.it" />
+    <meta name="keywords" content="simotrone, trone, perl, programming" />
+    <meta name="author" content="simotrone" />
+    <meta name="creation-date" content="2014-01-01" />
+    <meta name="title" content="JS Game of Life" />
+    <meta name="tags" content="games" />
+
+    <title>simotrone - JS Game of Life</title>
+    <!-- css -->
+    <link rel="stylesheet" type="text/css" href="css/base.css" />
+    <link rel="stylesheet" type="text/css" href="game-of-life/game-of-life.css" />
+
+    
+    <!-- js -->
+    <script type="text/javascript" src="js/base.js" charset="utf-8"></script>
+    <script type="text/javascript" src="game-of-life/d3.v3.min.js" charset="utf-8"></script>
+    <script type="text/javascript" src="game-of-life/game-of-life.js" charset="utf-8"></script>
+
+  </head>
+  <body>
+    <div class="wrapper">
+      <!-- main navigation menu -->
+      <nav>
+        <ul>
+          <li><a href="http://www.simotrone.it">Simotrone</a></li>
+          <li><a href="archive.html">Archive</a></li>
+          <li><a href="tags.html">Tags</a></li>
+        </ul>
+      </nav>
+
+      <!-- content -->
+      <article>
+        <h1 id="title">JS Game of Life</h1>
+        
+        <div id="article-content"><p>A zero player game in d3js. :-)</p>
+
+          <p>More info about the Conway's Game of Life on <a href="https://en.wikipedia.org/wiki/Conway%27s_Game_of_Life" alt="Conway's Game of Life" title="Conway's Game of Life">wikipedia</a>.</p>
+
+<div id="gol-board"></div>
+<div id="history-chart"></div>
+
+<script type="text/javascript">
+var cells, board, chart;
+window.onload = function () {
+  cells = Population({
+      'hor_cells': 20,
+      'ver_cells': 20,
+      'emptyness': 0.9
+  });
+  board = Board({
+      'boardId': 'gol-board',
+      'population': cells,
+      'width': 400,
+      'height': 400
+  });
+  chart = Chart({
+      'chartId': 'history-chart',
+      'data': cells.history()
+  });
+  var id = setInterval(function() {
+      cells.evolve();
+      board.update_tiles();
+			chart.draw(cells.history());
+  }, 700);
+  console.log('interval',id);
+};
+
+</script>
+</div>
+
+        <p><span class="date"><em>2014-01-01</em></span></p>
+
+      </article>
+
+      <div class="push"></div>
+    </div>
+
+    <footer>
+      <p>© Simotrone 2013-2015 &ndash; Personal layout.</p>
+    </footer>
+  </body>
+</html>
