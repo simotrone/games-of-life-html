@@ -19,7 +19,7 @@
     <!-- js -->
     <script type="text/javascript" src="js/base.js" charset="utf-8"></script>
     <script type="text/javascript" src="game-of-life/d3.v3.min.js" charset="utf-8"></script>
-<script type="text/javascript" src="game-of-life/game-of-life.js" charset="utf-8"></script>
+    <script type="text/javascript" src="game-of-life/game-of-life.js" charset="utf-8"></script>
 
   </head>
   <body>
@@ -39,13 +39,36 @@
         
         <div id="article-content"><p>A zero player game in d3js. :-)</p>
 
-					<p>More info about the Conway's Game of Life on <a href="https://en.wikipedia.org/wiki/Conway%27s_Game_of_Life" alt="Conway's Game of Life" title="Conway's Game of Life">wikipedia</a>.</p>
+          <p>More info about the Conway's Game of Life on <a href="https://en.wikipedia.org/wiki/Conway%27s_Game_of_Life" alt="Conway's Game of Life" title="Conway's Game of Life">wikipedia</a>.</p>
 
-<div id="chart">
-  <svg></svg>
-</div>
+<div id="gol-board"></div>
+<div id="history-chart"></div>
 
 <script type="text/javascript">
+var cells, board, chart;
+window.onload = function () {
+  cells = Population({
+      'hor_cells': 20,
+      'ver_cells': 20,
+      'emptyness': 0.9
+  });
+  board = Board({
+      'boardId': 'gol-board',
+      'population': cells,
+      'width': 400,
+      'height': 400
+  });
+  chart = Chart({
+      'chartId': 'history-chart',
+      'data': cells.history()
+  });
+  var id = setInterval(function() {
+      cells.evolve();
+      board.update_tiles();
+  }, 700);
+  console.log('interval',id);
+};
+/*
   window.onload = function () {
     var gol_js = GoL_js({
       cells_number: 40,
@@ -55,6 +78,7 @@
     gol_js.run();
     setInterval(gol_js.populate, 1000*60*2); // 2min
   };
+*/
 </script>
 </div>
 

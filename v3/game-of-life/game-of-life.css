@@ -1,18 +1,21 @@
 body {
 	background-color: tan;
 }
-#chart {
-	/* border: 1px solid black; 
-	background-color: tan; */
+
+#gol-board,
+#history-chart {
 	padding: 1em;
 	display: inline-block;
 }
-#chart > svg {
+
+#gol-board > svg,
+#history-chart > svg {
 	border: 1px solid black;
 	background-color: white;
+  padding: 1em;
 }
 
-rect {
+.cell {
 	fill: white;
 	stroke: #000;
 }
