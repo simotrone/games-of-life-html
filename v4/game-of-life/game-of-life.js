@@ -28,7 +28,7 @@ var Population = function(args) {
 
   var useless_gen_history_check = function(limit) {
     var ret = false,
-        hard_limit = 1000,
+        hard_limit = 500,
         tmp, i;
 
     if (typeof(limit) === 'undefined')
