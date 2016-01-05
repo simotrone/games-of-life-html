@@ -60,7 +60,8 @@ window.onload = function () {
   });
   chart = Chart({
       'chartId': 'history-chart',
-      'data': cells.history()
+			'width': 640,
+			'height': 400
   });
   var id = setInterval(function() {
       cells.evolve();

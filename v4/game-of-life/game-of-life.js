@@ -239,90 +239,167 @@ var Board = function(args) {
   };
 };
 
+/*
+ * +------------+
+ * | header     |
+ * +---------+--+
+ * |         |  |
+ * | bars    |  |
+ * |         |  |
+ * +---------+--+
+ */
 var Chart = function(args) {
   var chartId = args.chartId,
-    data = args.data || [],
-    w = 600,
-    h = 400,
-    header_h = 30,
-    barsG_h = h - header_h;
+    w = args.width,
+    h = args.height,
+    headerFrame = {
+			'w': w,
+			'h': 30
+		},
+		colFrame = {
+			'w': 30,
+			'h': h - headerFrame.h
+		},
+    barsFrame = {
+			'w': w - colFrame.w,
+			'h': h - headerFrame.h,
+		},
+		barsOverlayFrame = {
+			'w': w,
+			'h': barsFrame.h
+		},
+    floatFmt = d3.format('.2f'),
+		xScale = d3.scale.linear().range([0, barsFrame.w]),
+    yScale = d3.scale.linear().range([1, barsFrame.h]);
+
+	headerFrame.t = [0, 0];
+	barsFrame.t   = [0, headerFrame.h];
+	colFrame.t    = [barsFrame.w, headerFrame.h];
+	barsOverlayFrame.t = barsFrame.t;
   
-  var svg = d3.select('#'+chartId)
-    .append('svg')
-      .attr('width', w)
-      .attr('height', h)
-      .style('background', 'white');
-
-  var textG = svg.append('g')
+  var svg = d3.select('#'+chartId).append('svg')
     .attr('width', w)
-    .attr('height', header_h)
-    // .attr('transform', 'translate('+[0, 0]+')')
-    .attr('class', 'chart-header');
+    .attr('height', h)
+    .style('background', 'white');
 
-  // textG.append('text').text('pippo');
+	// title
+  svg.append('g')
+      .attr('width', headerFrame.w)
+      .attr('height', headerFrame.h)
+      .attr('transform', 'translate('+headerFrame.t+')')
+      .attr('class', 'chart-header')
+		.append('text')
+		  .attr('class', 'title')
+		  .attr('x', headerFrame.w / 2)
+		  .attr('y', headerFrame.h / 2)
+      .attr('text-anchor', 'middle')
+		  .text('Generations evolution');
 
   var barsG = svg.append('g')
-    .attr('width', w)
-    .attr('height', barsG_h)
-    .attr('transform', 'translate('+[0, header_h]+')')
+    .attr('width', barsFrame.w)
+    .attr('height', barsFrame.h)
+    .attr('transform', 'translate('+barsFrame.t+')')
     .attr('class', 'chart-bars');
 
-  var xScale = d3.scale.linear().range([0, w]),
-      yScale = d3.scale.linear().range([1, barsG_h]);
-
-  var floatFmt = d3.format('.2f');
+  var barsOverlayG = svg.append('g')
+    .attr('width', barsOverlayFrame.w)
+    .attr('height', barsOverlayFrame.h)
+    .attr('transform', 'translate('+barsOverlayFrame.t+')')
+    .attr('class', 'chart-bars-overlay');
 
   var draw = function(data) {
-    var barWidth = Math.floor(w / data.length),
+    var barWidth = Math.floor(barsFrame.w / data.length),
+			minVal = d3.min(data),
+			minPos = data.indexOf(minVal),
+			maxVal = d3.max(data),
+			maxPos = data.indexOf(maxVal),
+			meanVal = floatFmt(d3.mean(data)),
+			firstGenVal = data[0],
+			lastGen = data.length - 1,
+			lastGenVal = data.slice(-1),
+			linesData = [
+        { 'id': 'min',  'pos': minPos, 'value': minVal },
+        { 'id': 'mean', 'pos': 0,      'value': meanVal },
+        { 'id': 'max',  'pos': maxPos, 'value': maxVal }
+			],
       bars = barsG.selectAll('rect').data(data),
-      labelValues = [
-        { 'id': 'gen0', 'value': data[0] },
-        { 'id': 'min',  'value': d3.min(data) },
-        { 'id': 'mean', 'value': floatFmt(d3.mean(data)) },
-        { 'id': 'max',  'value': d3.max(data) },
-        { 'id': 'gen'+(data.length - 1), 'value': data.slice(-1) }
-    
-      ],
-      labels = textG.selectAll('text').data(labelValues);
+			lines = barsOverlayG.selectAll('line').data(linesData),
+			labelsG = barsOverlayG.selectAll('g.label-group').data(linesData),
+			labelsG_enter;
 
-    labels.enter()
-      .append('text')
-      .attr('class', 'label')
-      .attr('text-anchor', 'middle')
-
-    labels
-      .attr('y', 20)
-      .attr('x', function(d,i){ return 50 + i * w / labelValues.length; })
-      .text(function(d,i){ return d.id+' = '+d.value; });
-
-    labels.exit()
-      .remove();
-
+		/* histogram */
     xScale.domain([0, data.length]);
-    yScale.domain([0, d3.max(data)]);
+    yScale.domain([0, maxVal]);
 
     bars.enter()
       .append('rect')
-        // .attr('opacity', 0)
-        .attr('class', 'bar');
+			.attr('class', 'bar');
 
     bars
-      // .transition()
-      // .attr('opacity', 1)
       .attr('x', function(d,i){ return xScale(i); })
-      .attr('y', function(d,i){ return barsG_h - yScale(d); })
+      .attr('y', function(d,i){ return barsFrame.h - yScale(d); })
       .attr('width', barWidth)
       .attr('height', function(d,i){ return yScale(d); });
 
-    // .text(function(d,i){ return '('+i+','+d+')'; });o
+    bars.exit().remove();
 
-    bars.exit()
-      .remove();
+		lines.enter()
+			.append('line')
+			.attr('x1', xScale(0))
+			.attr('x2', xScale(data.length) + 10);
+
+		lines
+			.attr('class', function(d){ return 'line '+ d.id; })
+			.attr('y1', function(d){ return barsOverlayFrame.h - yScale(d.value); })
+			.attr('y2', function(d){ return barsOverlayFrame.h - yScale(d.value); });
+
+		lines.exit().remove();
+
+		/* Here a .parent() method would be nice, but...
+		   https://groups.google.com/forum/#!topic/d3-js/mEjem7IPshY
+		 Mike Bostock	- 22/10/2011
+		 Yes, it's intentional that there's no way to go back up the hierarchy with method chaining: you can only descend. Thank you, Peter, for summarizing my earlier remarks!
+		 
+		 There are two other technical reasons for not supporting ascension via method chaining.
+		 
+		 First, any subselection would have to keep a reference to the parent selection that generated it, which is potentially a bit of extra baggage. It might also be possible for the two to get out of sync.
+		 
+		 Second, it gets more complicated with grouping. When you subselect with selectAll, you group a selection: for each element in the current selection, you select an array of child elements, and each of these arrays becomes a separate group. Separate groups are needed to bind different hierarchical data (such as multi-dimensional arrays) to each group. It's also handy for assigning indexes within a group rather than globally. If you want to go back up the hierarchy by selecting a parent node, you have to decide whether you want to select the parent for each element (in which case the same parent node may be selected multiple times for siblings), or for each group.
+		 
+		 It's just easier to use variables. You don't have to create a variable for everything; only those cases where you want to append multiple siblings, or bubble back up to a parent after modifying children. And yes, I believe this also encourages you to make your code more readable by naming what you are doing. :)
+		 
+		 Mike
+		 */
+
+		// labels group when data enter
+		// create a <g> and append two <text> 
+		labelsG_enter = labelsG.enter()
+			.append('g')
+			.attr('class', function(d) { return 'label-group '+d.id; });
+
+		// the name is not dynamic
+	  labelsG_enter
+			.append('text')
+				.attr('class', function(d) { return 'label name '+d.id; })
+				.text(function(d){ return d.id; });
+
+		labelsG_enter
+			.append('text')
+				.attr('class', function(d) { return 'label value '+d.id; });
+
+		// updating labels group position
+		labelsG
+      .attr('transform', function(d) { return 'translate('+[barsFrame.w, barsOverlayFrame.h - yScale(d.value) - 5]+')'; });
+
+		// updating <text> label value
+		labelsG.selectAll('text.label.value')
+      .attr('y', 16)
+			.text(function(d){ return d.value; });
+
+		labelsG.exit().remove();
 
     // console.log('drawed data', data.length, data);
   };
-
-  draw(data);
 
   return {
     'draw': draw
