@@ -60,13 +60,13 @@ window.onload = function () {
   });
   chart = Chart({
       'chartId': 'history-chart',
-			'width': 640,
-			'height': 400
+      'width': 640,
+      'height': 400
   });
-	var id = population.run(1000, [
-			board.update_tiles,
-			function() { return chart.draw(population.history()); }
-		], false);
+  var id = population.run(1000, [
+      board.update_tiles,
+      function() { return chart.draw(population.history()); }
+    ], false);
   console.log('interval', id);
 };
 
