@@ -427,7 +427,11 @@ var Chart = function(args) {
       .attr('x', function(d,i){ return parseInt(xScale(i), 10); })
       .text(function(d,i){
         var t = '';
-        if (i === 0 || i % 5 === 0 || i === data.length -1)
+        if (i === 0 || i === data.length -1)
+          t = i;
+        if (i <= 20 && i % 5 === 0)
+          t = i;
+        if (i > 20 && i % 10 === 0)
           t = i;
         return t;
       });
