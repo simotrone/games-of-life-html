@@ -45,16 +45,16 @@
 <div id="history-chart"></div>
 
 <script type="text/javascript">
-var cells, board, chart;
+var population, board, chart;
 window.onload = function () {
-  cells = Population({
+  population = Population({
       'hor_cells': 20,
       'ver_cells': 20,
       'emptyness': 0.9
   });
   board = Board({
       'boardId': 'gol-board',
-      'population': cells,
+      'population': population,
       'width': 400,
       'height': 400
   });
@@ -63,12 +63,11 @@ window.onload = function () {
 			'width': 640,
 			'height': 400
   });
-  var id = setInterval(function() {
-      cells.evolve();
-      board.update_tiles();
-			chart.draw(cells.history());
-  }, 700);
-  console.log('interval',id);
+	var id = population.run(1000, [
+			board.update_tiles,
+			function() { return chart.draw(population.history()); }
+		], false);
+  console.log('interval', id);
 };
 
 </script>

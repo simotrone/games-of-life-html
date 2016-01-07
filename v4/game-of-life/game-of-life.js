@@ -159,6 +159,25 @@ var Population = function(args) {
       randomize();
   };
 
+  // evolve the population, and fire callbacks
+  var run = function(interval_ms, callbacks, verbose) {
+    var that = this,
+        intervalId;
+
+    intervalId = setInterval(function() {
+      that.evolve();
+      if (callbacks.length) {
+        callbacks.forEach(function(fn){
+          var ret = fn();
+          if (verbose) {
+            console.log('run', fn.name || fn.toString(), ret);
+          }
+        });
+      }
+    }, interval_ms || 1000);
+    return intervalId;
+  };
+
   // unused feature
   var turn = function(ids, val) {
     if (typeof(val) === 'undefined')
@@ -192,6 +211,7 @@ var Population = function(args) {
     'history': function() { return gen_history; },
     'hor_cells': hor_cells,
     'randomize': randomize,
+    'run': run,
     'survive': survive,
     'turn': turn,
     'ver_cells': ver_cells
@@ -228,7 +248,7 @@ var Board = function(args) {
         .attr('x', function(d){ return d.col * side_size; })
         .attr('y', function(d){ return d.row * side_size; });
 
-  var update_tiles = function() {
+  var update_tiles = function update_tiles () {
     var ret = tiles.classed({ 'selected': function(d){ return d.selected; } });
     // console.log('update tiles', ret.data().filter(function(d){ return d.selected}).length );
   };
@@ -307,7 +327,7 @@ var Chart = function(args) {
     .attr('transform', 'translate('+barsOverlayFrame.t+')')
     .attr('class', 'chart-bars-overlay');
 
-  var draw = function(data) {
+  var draw = function draw (data) {
     var barWidth = Math.floor(barsFrame.w / data.length),
       minVal = d3.min(data),
       minPos = data.indexOf(minVal),
