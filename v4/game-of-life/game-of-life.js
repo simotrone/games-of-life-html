@@ -263,9 +263,9 @@ var Board = function(args) {
  * +------------+
  * | header     |
  * +---------+--+
- * |         |  |
- * | bars    |  |
- * |         |  |
+ * | bars    | c|
+ * +---------+ o|
+ * | footer  | l|
  * +---------+--+
  */
 var Chart = function(args) {
@@ -280,9 +280,13 @@ var Chart = function(args) {
       'w': 30,
       'h': h - headerFrame.h
     },
+    footerFrame = {
+      'w': w - colFrame.w,
+      'h': 15
+    },
     barsFrame = {
       'w': w - colFrame.w,
-      'h': h - headerFrame.h,
+      'h': h - headerFrame.h - footerFrame.h,
     },
     barsOverlayFrame = {
       'w': w,
@@ -294,6 +298,7 @@ var Chart = function(args) {
 
   headerFrame.t = [0, 0];
   barsFrame.t   = [0, headerFrame.h];
+  footerFrame.t = [0, headerFrame.h + barsFrame.h];
   colFrame.t    = [barsFrame.w, headerFrame.h];
   barsOverlayFrame.t = barsFrame.t;
   
@@ -327,6 +332,12 @@ var Chart = function(args) {
     .attr('transform', 'translate('+barsOverlayFrame.t+')')
     .attr('class', 'chart-bars-overlay');
 
+  var footerG = svg.append('g')
+    .attr('width', footerFrame.w)
+    .attr('height', footerFrame.h)
+    .attr('transform', 'translate('+footerFrame.t+')')
+    .attr('class', 'chart-footer');
+
   var draw = function draw (data) {
     var barWidth = Math.floor(barsFrame.w / data.length),
       minVal = d3.min(data),
@@ -343,6 +354,7 @@ var Chart = function(args) {
         { 'id': 'max',  'pos': maxPos, 'value': maxVal }
       ],
       bars = barsG.selectAll('rect').data(data),
+      footer = footerG.selectAll('text.label.generation').data(data),
       lines = barsOverlayG.selectAll('line').data(linesData),
       labelsG = barsOverlayG.selectAll('text.label.value').data(linesData);
 
@@ -404,6 +416,24 @@ var Chart = function(args) {
 
     // console.log('linesData', linesData);
     labelsG.exit().remove();
+
+    // show generation 
+    footer.enter()
+      .append('text')
+      .attr('y', 15)
+      .attr('class', 'generation label');
+
+    footer
+      .attr('x', function(d,i){ return parseInt(xScale(i), 10); })
+      .text(function(d,i){
+        var t = '';
+        if (i === 0 || i % 5 === 0 || i === data.length -1)
+          t = i;
+        return t;
+      });
+
+    footer.exit()
+      .remove();
 
     // console.log('drawed data', data.length, data);
   };
